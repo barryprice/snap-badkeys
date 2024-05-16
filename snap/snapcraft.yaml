@@ -1,0 +1,28 @@
+name: badkeys
+base: core22 # core24 crashes on build, core22 will do for now
+adopt-info: badkeys
+summary: Tool and library to check cryptographic public keys for known vulnerabilities
+description: |
+  badkeys checks public keys in various formats for known vulnerabilities.
+  A web version can be found at badkeys.info.
+grade: stable
+confinement: strict
+
+apps:
+  badkeys:
+    command: bin/badkeys
+    plugs: [home, network]
+
+parts:
+  badkeys:
+    plugin: python
+    source: https://github.com/badkeys/badkeys.git
+    python-packages:
+      - dnspython
+      - paramiko
+    override-build: |
+      # build the latest tagged release
+      latest_tag=$(git tag --list | grep '^v' | sort -V | tail -1)
+      git checkout ${latest_tag?}
+      craftctl set version=$(git describe --tags)
+      craftctl default
